@@ -2,8 +2,12 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import { env } from "../config/env";
 import { logger } from "../utils/logger";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface ToolDefinition {
   name: string;
@@ -47,9 +51,16 @@ export class McpClientManager {
     try {
       await this.disconnect();
 
-      const serverScriptPath = path.resolve(process.cwd(), env.MCP_SERVER_PATH);
-      if (!fs.existsSync(serverScriptPath)) {
-        throw new Error(`Arquivo do servidor MCP não encontrado em: ${serverScriptPath}`);
+      const candidates = [
+        path.resolve(process.cwd(), env.MCP_SERVER_PATH),
+        path.resolve(process.cwd(), "twitter-mcp-server/build/index.js"),
+        path.resolve(process.cwd(), "../twitter-mcp-server/build/index.js"),
+        path.resolve(__dirname, "../../twitter-mcp-server/build/index.js"),
+        path.resolve(__dirname, "../../../twitter-mcp-server/build/index.js")
+      ];
+      const serverScriptPath = candidates.find((c) => fs.existsSync(c));
+      if (!serverScriptPath) {
+        throw new Error(`Arquivo do servidor MCP não encontrado em nenhum dos caminhos testados: ${candidates.join(", ")}`);
       }
 
       const mergedEnv: Record<string, string> = {
