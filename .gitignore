@@ -1,0 +1,41 @@
+# Dependências
+node_modules/
+*/node_modules/
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+*.local
+
+# Builds de produção
+dist/
+*/dist/
+build/
+*/build/
+
+# Banco de dados SQLite local
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+backend/prisma/*.db
+backend/prisma/*.db-journal
+backend/*.db
+backend/*.db-journal
+
+# Uploads de mídia locais (mantém apenas .gitkeep)
+backend/uploads/*
+!backend/uploads/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# Logs e arquivos de sistema
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

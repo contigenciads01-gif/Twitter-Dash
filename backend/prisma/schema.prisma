@@ -1,0 +1,80 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Contas do Twitter/X gerenciadas no Dashboard
+model Account {
+  id              String   @id @default(uuid())
+  username        String   @unique
+  displayName     String?
+  email           String?
+  // Credenciais salvas com segurança para alimentar o processo MCP
+  password        String?
+  apiKey          String?
+  apiSecret       String?
+  accessToken     String?
+  accessSecret    String?
+  avatarUrl       String?
+  isActive        Boolean  @default(true)
+  status          String   @default("connected") // connected | error | disconnected
+  lastError       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  posts           ScheduledPost[]
+
+  @@map("accounts")
+}
+
+// Posts agendados e publicados
+model ScheduledPost {
+  id           String    @id @default(uuid())
+  accountId    String?
+  text         String
+  mediaPaths   String    @default("[]") // JSON string: string[]
+  threadParts  String?   // JSON string: string[] (opcional, para threads)
+  scheduledAt  DateTime  // Armazenado em UTC
+  status       String    @default("agendado") // agendado | publicando | publicado | falhou | cancelado
+  tweetId      String?   @unique
+  attempts     Int       @default(0)
+  lastError    String?
+  createdAt    DateTime  @default(now())
+  publishedAt  DateTime?
+
+  account      Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  snapshots    TweetMetricsSnapshot[]
+
+  @@index([status, scheduledAt])
+  @@map("scheduled_posts")
+}
+
+// Histórico de métricas capturadas por tweet
+model TweetMetricsSnapshot {
+  id          String   @id @default(uuid())
+  tweetId     String
+  capturedAt  DateTime @default(now()) // Armazenado em UTC
+  likes       Int      @default(0)
+  retweets    Int      @default(0)
+  replies     Int      @default(0)
+  quotes      Int      @default(0)
+  views       Int?     // Opcional, caso não venha da API/scraping
+
+  post        ScheduledPost? @relation(fields: [tweetId], references: [tweetId], onDelete: Cascade)
+
+  @@index([tweetId, capturedAt])
+  @@map("tweet_metrics_snapshots")
+}
+
+// Configurações do sistema (pesos do score, intervalo entre posts, etc.)
+model AppSetting {
+  key         String   @id
+  value       String   // JSON string
+  updatedAt   DateTime @updatedAt
+
+  @@map("app_settings")
+}

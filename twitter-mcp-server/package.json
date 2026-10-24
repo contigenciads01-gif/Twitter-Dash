@@ -1,0 +1,40 @@
+{
+  "name": "twitter-mcp-server",
+  "version": "0.1.1",
+  "description": "Twitter MCP Server based on ElizaOS Agent Twitter Client",
+  "keywords": [
+    "twitter",
+    "mcp",
+    "server",
+    "agent",
+    "elizaos"
+  ],
+  "author": "Talib Kareem",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taazkareem/twitter-mcp-server.git"
+  },
+  "private": false,
+  "type": "module",
+  "bin": {
+    "twitter-mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "agent-twitter-client": "^0.0.18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
